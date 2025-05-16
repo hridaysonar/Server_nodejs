@@ -20,6 +20,14 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
+
+  // const checkAdmin = (req, res, next) => {
+  //   const credintial = req.body;
+  //   console.log(credintial);
+
+  //   next()
+  // }
+
   try {
     await client.connect();
     const coffeeCollection = client.db("coffeeDB").collection("coffees");
@@ -79,12 +87,21 @@ app.put('/coffees/:id', async (req, res) => {
         const result = await coffeeCollection.deleteOne(query);
         res.send(result);
       })
+
+    app.post('/admin_login', async(req, res) => {
+      const credintial = req.body;
+      if(credintial.username !== process.env.ADMIN_USERNAME && credintial.password !== process.env.ADMIN_PASS){
+        return res
+        .status(404)
+        .json({'message' : "Invalid admin credintial",'status': 404})
+      }
+      res.json({'message': "Login success",'status': 200})
+    })
+
     app.post('/coffees', async (req, res) => {
       const newCoffee = req.body;
       console.log("Received Coffee Data:", newCoffee);
-        // delet
-    
-
+      
       try {
         const result = await coffeeCollection.insertOne(newCoffee);
         res.status(201).json({ message: "Coffee added successfully", data: result });
